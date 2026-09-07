@@ -4,16 +4,117 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0b1220" />
-<meta name="description" content="RideShare CPM — loaded cost per mile, offer scoring, and shift tracking for drivers. Planning tool, not tax advice." />
-<meta name="robots" content="index,follow" />
-<meta property="og:title" content="RideShare CPM" />
-<meta property="og:description" content="Know your loaded cost per mile before you tap Accept." />
-<meta property="og:type" content="website" />
+<meta name="description" content="RideShare CPM planner for drivers" />
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" />
 <title>RideShare CPM</title>
-</head>
-<body>
-<p>Placeholder — full app uploading next.</p>
-</body>
-</html>
+<style>
+:root{--bg:#0b1220;--card:#121b2e;--card2:#182338;--line:#243049;--text:#e8eef8;--muted:#93a0b8;--accent:#3d8bfd;--good:#22c55e;--thin:#eab308;--skip:#ef4444;--radius:16px}
+*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}body{padding-bottom:88px}
+header.app{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#0b1220 70%,rgba(11,18,32,.85));padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+h1{margin:0;font-size:18px}header.app p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.pill{flex-shrink:0;margin-top:2px;font-size:11px;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--muted);cursor:pointer}
+.pill.pro{background:rgba(34,197,94,.16);color:var(--good);border-color:transparent}
+.wrap{max-width:720px;margin:0 auto;padding:12px 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 10px;font-size:15px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+input{width:100%;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px}
+.full{grid-column:1/-1}
+button{border:0;border-radius:12px;padding:12px 14px;font-weight:700;font-size:15px;background:var(--accent);color:#fff;width:100%;cursor:pointer}
+button.secondary{background:#243049;color:var(--text)}button.good{background:#15803d}button.danger{background:#991b1b}button.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+button:disabled,a.pay.off{opacity:.45;pointer-events:none}
+a.pay{display:block;text-align:center;text-decoration:none;border-radius:12px;padding:12px 14px;font-weight:700;font-size:15px;background:var(--good);color:#052e16;width:100%}
+a.pay.manage{background:#243049;color:var(--text);margin-top:8px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.metric{background:var(--card2);border-radius:12px;padding:10px}.metric b{display:block;font-size:18px}.metric span{color:var(--muted);font-size:11px}
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:800}
+.TAKE{background:rgba(34,197,94,.18);color:var(--good)}.THIN{background:rgba(234,179,8,.16);color:var(--thin)}.SKIP{background:rgba(239,68,68,.16);color:var(--skip)}
+.verdict{text-align:center;padding:16px 8px}.verdict .badge{font-size:28px;padding:8px 18px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);background:#0e1626;border-top:1px solid var(--line);padding:6px 6px calc(8px + env(safe-area-inset-bottom))}
+.nav button{background:transparent;color:var(--muted);font-size:11px;padding:8px 4px;font-weight:600}.nav button.on{color:#fff}
+.hidden{display:none!important}.trip{border-bottom:1px solid var(--line);padding:8px 0;font-size:13px}
+.muted{color:var(--muted);font-size:12px;line-height:1.45}.tiny{font-size:11px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}th{color:var(--muted)}
+.ok{color:var(--good)}.bad{color:var(--skip)}
+.lock{margin-top:10px;padding:12px;border-radius:12px;background:rgba(61,139,253,.08);border:1px dashed var(--line)}
+.banner{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);padding:10px 12px;border-radius:12px;margin-bottom:12px;font-size:13px}
+.banner.warn{background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.35)}
+</style></head><body>
+<header class="app"><div><h1>RideShare Cost Per Mile</h1><p>Planning tool — not tax advice. Data stays on this device unless you export.</p></div>
+<button type="button" class="pill" id="proPill" onclick="showTab('setup');document.getElementById('payCard').scrollIntoView({behavior:'smooth'})">FREE</button></header>
+<div class="wrap"><div id="flash" class="hidden"></div>
+<section id="tab-setup">
+<div class="card"><h2>Vehicle &amp; costs</h2>
+<div class="row">
+<div><label>MPG</label><input id="mpg" type="number" inputmode="decimal" step="0.1"></div>
+<div><label>Fuel price $/gal</label><input id="fuelPrice" type="number" inputmode="decimal" step="0.01"></div>
+<div><label>Insurance $/mo</label><input id="ins" type="number" inputmode="decimal" step="1"></div>
+<div><label>Car payment $/mo</label><input id="pay" type="number" inputmode="decimal" step="1"></div>
+<div><label>Phone $/mo</label><input id="phone" type="number" inputmode="decimal" step="1"></div>
+<div><label>Expected miles / mo</label><input id="moMiles" type="number" inputmode="decimal" step="10"></div>
+<div><label>Maintenance $/mi</label><input id="maint" type="number" inputmode="decimal" step="0.01"></div>
+<div><label>Depreciation $/mi</label><input id="dep" type="number" inputmode="decimal" step="0.01"></div>
+<div class="full"><label>Hourly thin floor ($ net / hr after the car)</label><input id="thinFloor" type="number" inputmode="decimal" step="1"></div>
+</div>
+<div class="btns"><button type="button" onclick="saveSetup()">Save setup</button><button type="button" class="secondary" onclick="resetSetup()">Reset defaults</button></div></div>
+<div class="card" id="payCard"><h2>Pro subscription</h2>
+<p class="muted">Free: loaded $/mi and one-off offer checks. Pro: live shift, shift log, dashboard history, export/import.</p>
+<p class="muted">Billed by Stripe. After checkout return with <b>?paid=1</b>. Cancel in the Stripe portal.</p>
+<a class="pay" id="payNow" href="#" target="_blank" rel="noopener" onclick="return goPay(event)">Subscribe with Stripe</a>
+<a class="pay manage" id="manageSub" href="#" target="_blank" rel="noopener" onclick="return goPortal(event)">Manage / cancel</a>
+<div class="row" style="margin-top:10px"><div class="full"><label>Restore Pro (license key)</label><input id="unlockKey" type="text" placeholder="Enter license key" autocomplete="off"></div></div>
+<div class="btns"><button type="button" class="secondary" onclick="unlockWithKey()">Unlock Pro</button><button type="button" class="ghost" onclick="lockDevice()">Mark this device unpaid</button></div>
+<p class="tiny" id="payStatus" style="margin-top:10px"></p></div>
+<div class="card"><h2>Loaded cost per mile</h2><div class="metrics" id="setupMetrics"></div>
+<p class="muted" style="margin-top:10px">Fuel = price ÷ MPG. Fixed costs spread across expected monthly miles. IRS rate is a planning benchmark only — pick standard OR actual expenses per car per year, not both.</p></div>
+</section>
+<section id="tab-offer" class="hidden">
+<div class="card"><h2>Shift target</h2><div class="row">
+<div><label>I need $ net after the car</label><input id="needNet" type="number" inputmode="decimal" step="1"></div>
+<div><label>Optional hours planned</label><input id="needHrs" type="number" inputmode="decimal" step="0.25"></div></div>
+<p class="tiny" id="targetHint"></p></div>
+<div class="card"><h2>This offer</h2><div class="row">
+<div><label>Pickup / deadhead mi</label><input id="puMi" type="number" inputmode="decimal" step="0.1"></div>
+<div><label>Trip mi</label><input id="tripMi" type="number" inputmode="decimal" step="0.1"></div>
+<div class="full"><label>Or total miles (overrides split if filled)</label><input id="totMi" type="number" inputmode="decimal" step="0.1" placeholder="optional"></div>
+<div><label>Offer $</label><input id="offerPay" type="number" inputmode="decimal" step="0.01"></div>
+<div><label>Minutes</label><input id="mins" type="number" inputmode="decimal" step="1"></div>
+<div class="full"><label>Tolls / extras $</label><input id="tolls" type="number" inputmode="decimal" step="0.01"></div></div>
+<div class="btns"><button type="button" onclick="checkOffer()">Check offer</button><button type="button" class="good" id="addTripBtn" onclick="acceptTrip()">Add to shift</button></div>
+<div id="verdictBox"></div>
+<div id="offerLock" class="lock hidden"><p class="muted" style="margin:0">Checking an offer is free. Saving it to a live shift is Pro.</p><div class="btns"><button type="button" onclick="showTab('setup')">Get Pro</button></div></div></div>
+<div class="card"><h2>Live shift</h2><div class="metrics" id="shiftMetrics"></div><div id="shiftTrips"></div>
+<div class="row" style="margin-top:10px"><div><label>Gas purchased $</label><input id="gasDollars" type="number" inputmode="decimal" step="0.01"></div><div><label>Gallons (optional)</label><input id="gasGal" type="number" inputmode="decimal" step="0.01"></div></div>
+<p class="tiny">Pump total replaces the MPG fuel guess for this shift net.</p>
+<div class="btns"><button type="button" class="secondary" onclick="undoTrip()">Undo last trip</button><button type="button" class="danger" onclick="endShift()">End shift → Dashboard</button></div></div>
+</section>
+<section id="tab-log" class="hidden"><div class="card"><h2>Log a whole shift</h2>
+<div id="logLock" class="lock hidden"><p class="muted" style="margin:0 0 8px">Shift logging is Pro.</p><button type="button" onclick="showTab('setup')">Subscribe to unlock</button></div>
+<div id="logForm"><div class="row">
+<div><label>Date</label><input id="logDate" type="date"></div>
+<div><label>Hours</label><input id="logHrs" type="number" inputmode="decimal" step="0.1"></div>
+<div><label>Total miles</label><input id="logMi" type="number" inputmode="decimal" step="0.1"></div>
+<div><label>Gross pay $</label><input id="logPay" type="number" inputmode="decimal" step="0.01"></div>
+<div><label>Fuel $ (optional)</label><input id="logFuel" type="number" inputmode="decimal" step="0.01"></div>
+<div><label>Extras / tolls $</label><input id="logX" type="number" inputmode="decimal" step="0.01"></div>
+<div class="full"><label>Notes</label><input id="logNotes" type="text"></div></div>
+<div class="btns"><button type="button" onclick="logShift()">Save shift</button><button type="button" class="secondary" onclick="exportJson()">Export JSON</button></div>
+<div class="btns"><button type="button" class="ghost" onclick="document.getElementById('importFile').click()">Import JSON</button>
+<input id="importFile" type="file" accept="application/json,.json" class="hidden" onchange="importJson(event)"></div></div></div></section>
+<section id="tab-dash" class="hidden"><div class="card"><h2>Dashboard</h2><div class="metrics" id="dashMetrics"></div><p class="muted" id="irsNote"></p></div>
+<div class="card"><h2>Shift history</h2>
+<div id="histLock" class="lock hidden"><p class="muted" style="margin:0 0 8px">History is Pro. Subscribe, return with ?paid=1, or enter the license key.</p><button type="button" onclick="showTab('setup')">Get Pro</button></div>
+<div id="histWrap"><div style="overflow-x:auto"><table id="histTable"><thead><tr><th>Date</th><th>Mi</th><th>Pay</th><th>Net</th><th>$/mi</th></tr></thead><tbody></tbody></table></div>
+<div class="btns" style="margin-top:10px"><button type="button" class="secondary" onclick="clearHistory()">Clear history</button><button type="button" class="ghost" onclick="goPay()">Subscribe / Stripe</button></div></div>
+<p class="tiny" id="stripeBox"></p></div></section></div>
+<nav class="nav">
+<button type="button" id="n-setup" class="on" onclick="showTab('setup')">Setup</button>
+<button type="button" id="n-offer" onclick="showTab('offer')">Offer</button>
+<button type="button" id="n-log" onclick="showTab('log')">Log</button>
+<button type="button" id="n-dash" onclick="showTab('dash')">Dash</button>
+</nav>
+<script src="app.js"></script>
+</body></html>
