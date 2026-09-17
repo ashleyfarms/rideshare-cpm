@@ -215,6 +215,25 @@ function importJson(ev) {
 }
 function stripeConfigured() { return STRIPE_LINK && !STRIPE_LINK.includes('REPLACE_ME'); }
 function portalConfigured() { return !!(STRIPE_PORTAL && STRIPE_PORTAL.indexOf('http') === 0); }
+
+/** GA4 purchase+subscribe once per successful checkout (no price constant in this app — value omitted). */
+function trackSubscriptionPurchase(transactionId) {
+  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
+  var tid = String(transactionId || '').trim() || ('local-rideshare-cpm-' + Date.now());
+  var key = 'ga-sub-rideshare-cpm-' + tid;
+  try {
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+  } catch (e) {}
+  var payload = {
+    transaction_id: tid,
+    currency: 'USD',
+    items: [{ item_name: 'RideShare CPM subscription', item_category: 'subscription' }]
+  };
+  window.gtag('event', 'purchase', payload);
+  window.gtag('event', 'subscribe', { app: 'rideshare-cpm', currency: 'USD' });
+}
+
 function markPaidFromUrl() {
   try {
     const q = new URLSearchParams(location.search);
@@ -222,6 +241,7 @@ function markPaidFromUrl() {
       S.paid = true; S.subStatus = 'active'; S.subSince = S.subSince || new Date().toISOString();
       localStorage.setItem(KEY, JSON.stringify(S));
       history.replaceState({}, '', location.pathname);
+      trackSubscriptionPurchase(q.get('session_id') || 'paid-1');
       flash('Pro unlocked on this device. Manage billing in Stripe to cancel.');
     }
     if (q.get('sub') === 'canceled') {
