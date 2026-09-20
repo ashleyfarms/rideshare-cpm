@@ -68,14 +68,14 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;p
 <div class="full"><label>Hourly thin floor ($ net / hr after the car)</label><input id="thinFloor" type="number" inputmode="decimal" step="1"></div>
 </div>
 <div class="btns"><button type="button" onclick="saveSetup()">Save setup</button><button type="button" class="secondary" onclick="resetSetup()">Reset defaults</button></div></div>
-<div class="card" id="payCard"><h2>Pro subscription</h2>
-<p class="muted">Free: loaded $/mi and one-off offer checks. Pro: live shift, shift log, dashboard history, export/import.</p>
-<p class="muted">Billed by Stripe. After checkout return with <b>?paid=1</b>. Cancel in the Stripe portal.</p>
-<a class="pay" id="payNow" href="#" target="_blank" rel="noopener" onclick="return goPay(event)">Subscribe with Stripe</a>
-<a class="pay manage" id="manageSub" href="#" target="_blank" rel="noopener" onclick="return goPortal(event)">Manage / cancel</a>
-<div class="row" style="margin-top:10px"><div class="full"><label>Restore Pro (license key)</label><input id="unlockKey" type="text" placeholder="Enter license key" autocomplete="off"></div></div>
-<div class="btns"><button type="button" class="secondary" onclick="unlockWithKey()">Unlock Pro</button><button type="button" class="ghost" onclick="lockDevice()">Mark this device unpaid</button></div>
-<p class="tiny" id="payStatus" style="margin-top:10px"></p></div>
+<aside class="ad-slot ad-slot--header" aria-label="Advertisement — header" data-ad-slot="header" data-ad-ready="placeholder" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;margin:.75rem 0;border:1px dashed rgba(0,0,0,.25);border-radius:10px;font-size:.8rem;opacity:.85"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;border:1px solid rgba(0,0,0,.2);border-radius:5px;padding:.1rem .35rem">Ad</span><span>Free · supported by sponsors</span></aside>
+<div class="card" id="payCard"><h2>Free with ads</h2>
+<p class="muted">All features unlocked: loaded $/mi, offer checks, live shift, shift log, dashboard history, export/import.</p>
+<p class="muted">Quiet sponsor spots keep RideShare CPM free. Stripe checkout is paused.</p>
+<a class="pay off" id="payNow" href="#" onclick="return false">Free · supported by sponsors</a>
+<a class="pay manage" id="manageSub" href="#" style="display:none" onclick="return false">Manage / cancel</a>
+<input id="unlockKey" type="hidden" value="">
+<p class="tiny" id="payStatus" style="margin-top:10px">Free on this device. No subscription.</p></div>
 <div class="card"><h2>Loaded cost per mile</h2><div class="metrics" id="setupMetrics"></div>
 <p class="muted" style="margin-top:10px">Fuel = price ÷ MPG. Fixed costs spread across expected monthly miles. IRS rate is a planning benchmark only — pick standard OR actual expenses per car per year, not both.</p></div>
 </section>
@@ -93,14 +93,14 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;p
 <div class="full"><label>Tolls / extras $</label><input id="tolls" type="number" inputmode="decimal" step="0.01"></div></div>
 <div class="btns"><button type="button" onclick="checkOffer()">Check offer</button><button type="button" class="good" id="addTripBtn" onclick="acceptTrip()">Add to shift</button></div>
 <div id="verdictBox"></div>
-<div id="offerLock" class="lock hidden"><p class="muted" style="margin:0">Checking an offer is free. Saving it to a live shift is Pro.</p><div class="btns"><button type="button" onclick="showTab('setup')">Get Pro</button></div></div></div>
+<div id="offerLock" class="lock hidden"></div></div>
 <div class="card"><h2>Live shift</h2><div class="metrics" id="shiftMetrics"></div><div id="shiftTrips"></div>
 <div class="row" style="margin-top:10px"><div><label>Gas purchased $</label><input id="gasDollars" type="number" inputmode="decimal" step="0.01"></div><div><label>Gallons (optional)</label><input id="gasGal" type="number" inputmode="decimal" step="0.01"></div></div>
 <p class="tiny">Pump total replaces the MPG fuel guess for this shift net.</p>
 <div class="btns"><button type="button" class="secondary" onclick="undoTrip()">Undo last trip</button><button type="button" class="danger" onclick="endShift()">End shift → Dashboard</button></div></div>
 </section>
 <section id="tab-log" class="hidden"><div class="card"><h2>Log a whole shift</h2>
-<div id="logLock" class="lock hidden"><p class="muted" style="margin:0 0 8px">Shift logging is Pro.</p><button type="button" onclick="showTab('setup')">Subscribe to unlock</button></div>
+<div id="logLock" class="lock hidden"></div>
 <div id="logForm"><div class="row">
 <div><label>Date</label><input id="logDate" type="date"></div>
 <div><label>Hours</label><input id="logHrs" type="number" inputmode="decimal" step="0.1"></div>
@@ -114,9 +114,10 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;p
 <input id="importFile" type="file" accept="application/json,.json" class="hidden" onchange="importJson(event)"></div></div></div></section>
 <section id="tab-dash" class="hidden"><div class="card"><h2>Dashboard</h2><div class="metrics" id="dashMetrics"></div><p class="muted" id="irsNote"></p></div>
 <div class="card"><h2>Shift history</h2>
-<div id="histLock" class="lock hidden"><p class="muted" style="margin:0 0 8px">History is Pro. Subscribe, return with ?paid=1, or enter the license key.</p><button type="button" onclick="showTab('setup')">Get Pro</button></div>
+<div id="histLock" class="lock hidden"></div>
+<aside class="ad-slot ad-slot--in-feed" aria-label="Advertisement — in feed" data-ad-slot="in-feed" data-ad-ready="placeholder" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;margin:.75rem 0;border:1px dashed rgba(0,0,0,.25);border-radius:10px;font-size:.8rem;opacity:.85"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;border:1px solid rgba(0,0,0,.2);border-radius:5px;padding:.1rem .35rem">Ad</span><span>Free · supported by sponsors</span></aside>
 <div id="histWrap"><div style="overflow-x:auto"><table id="histTable"><thead><tr><th>Date</th><th>Mi</th><th>Pay</th><th>Net</th><th>$/mi</th></tr></thead><tbody></tbody></table></div>
-<div class="btns" style="margin-top:10px"><button type="button" class="secondary" onclick="clearHistory()">Clear history</button><button type="button" class="ghost" onclick="goPay()">Subscribe / Stripe</button></div></div>
+<div class="btns" style="margin-top:10px"><button type="button" class="secondary" onclick="clearHistory()">Clear history</button></div></div>
 <p class="tiny" id="stripeBox"></p></div></section></div>
 <nav class="nav">
 <button type="button" id="n-setup" class="on" onclick="showTab('setup')">Setup</button>
