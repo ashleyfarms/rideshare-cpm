@@ -1,7 +1,7 @@
-const STRIPE_LINK = 'https://buy.stripe.com/28E14g5K7asc5Ax4jz4AU00';
+const STRIPE_LINK = '';
 const STRIPE_PORTAL = '';
-const LICENSE_KEY = 'RIDE-PRO-2026';
-const SUB_LABEL = 'Pro subscription (recurring, billed by Stripe)';
+const LICENSE_KEY = '';
+const SUB_LABEL = 'Free · supported by sponsors';
 const KEY = 'rscpm_v1';
 const defaults = {
   mpg: 28, fuelPrice: 3.29, ins: 160, pay: 380, phone: 40, moMiles: 2500,
@@ -19,7 +19,7 @@ function load() {
   } catch { return { ...defaults, live: { trips: [], gasDollars: 0, gasGal: 0 } }; }
 }
 let S = load();
-function isPro() { return !!(S.paid || S.subStatus === 'active'); }
+function isPro() { return true; /* free + ads — all features unlocked */ }
 function persist() {
   S.mpg = num('mpg', S.mpg); S.fuelPrice = num('fuelPrice', S.fuelPrice);
   S.ins = num('ins', S.ins); S.pay = num('pay', S.pay); S.phone = num('phone', S.phone);
@@ -57,16 +57,15 @@ function flash(msg, warn) {
   setTimeout(() => el.classList.add('hidden'), 6000);
 }
 function applyGates() {
-  const pro = isPro();
   const pill = document.getElementById('proPill');
-  pill.textContent = pro ? 'PRO' : 'FREE';
-  pill.classList.toggle('pro', pro);
-  document.getElementById('offerLock').classList.toggle('hidden', pro);
-  document.getElementById('addTripBtn').disabled = !pro;
-  document.getElementById('logLock').classList.toggle('hidden', pro);
-  document.getElementById('logForm').classList.toggle('hidden', !pro);
-  document.getElementById('histLock').classList.toggle('hidden', pro);
-  document.getElementById('histWrap').classList.toggle('hidden', !pro);
+  pill.textContent = 'FREE';
+  pill.classList.remove('pro');
+  document.getElementById('offerLock').classList.add('hidden');
+  document.getElementById('addTripBtn').disabled = false;
+  document.getElementById('logLock').classList.add('hidden');
+  document.getElementById('logForm').classList.remove('hidden');
+  document.getElementById('histLock').classList.add('hidden');
+  document.getElementById('histWrap').classList.remove('hidden');
 }
 function fillSetup() {
   ['mpg','fuelPrice','ins','pay','phone','moMiles','maint','dep','thinFloor'].forEach(k => setVal(k, S[k]));
@@ -269,25 +268,21 @@ function renderPay() {
   const m = document.getElementById('manageSub');
   const status = document.getElementById('payStatus');
   const box = document.getElementById('stripeBox');
-  const active = isPro();
-  if (a) { a.href = stripeConfigured() ? STRIPE_LINK : '#'; a.classList.toggle('off', !stripeConfigured()); a.textContent = active ? 'Resubscribe / update card' : 'Subscribe with Stripe'; }
-  if (m) { m.style.display = portalConfigured() || active ? 'block' : 'none'; m.href = portalConfigured() ? STRIPE_PORTAL : '#'; }
-  if (status) {
-    if (!stripeConfigured()) status.textContent = 'Create a recurring Stripe Payment Link and paste it in STRIPE_LINK.';
-    else if (active) status.textContent = SUB_LABEL + ' — this device is marked Pro. Cancel in Stripe, then tap Mark this device unpaid. This flag does not auto-clear.';
-    else status.textContent = SUB_LABEL + '. Set Stripe success URL to this site plus ?paid=1. License key: ' + LICENSE_KEY;
-  }
-  if (box) box.textContent = active ? 'Pro on this device. Use Manage / cancel for Stripe billing.' : (stripeConfigured() ? 'Subscribe opens your Stripe recurring Payment Link.' : 'Add a recurring STRIPE_LINK to enable billing.');
+  if (a) { a.href = '#'; a.classList.add('off'); a.textContent = 'Free · supported by sponsors'; }
+  if (m) { m.style.display = 'none'; }
+  if (status) status.textContent = 'Free on this device. Quiet ads keep RideShare CPM free — no subscription.';
+  if (box) box.textContent = 'Free with ads. Stripe checkout is paused.';
 }
+
 function goPay(ev) {
   if (ev) ev.preventDefault();
-  if (!stripeConfigured()) { alert('Add a recurring Stripe Payment Link in STRIPE_LINK.'); return false; }
-  window.open(STRIPE_LINK, '_blank', 'noopener'); return false;
+  flash('RideShare CPM is free with ads — no checkout needed.');
+  return false;
 }
 function goPortal(ev) {
   if (ev) ev.preventDefault();
-  if (portalConfigured()) { window.open(STRIPE_PORTAL, '_blank', 'noopener'); return false; }
-  alert('Add your Stripe Customer Portal login URL to STRIPE_PORTAL.'); return false;
+  flash('No billing portal — app is free with ads.');
+  return false;
 }
 function showTab(name) {
   ['setup','offer','log','dash'].forEach(t => {
