@@ -1,4 +1,4 @@
-# RideShare CPM
+# FareMax (RideShare CPM)
 
 Loaded cost-per-mile planner for rideshare drivers. Static site. No server.
 
@@ -6,17 +6,15 @@ Loaded cost-per-mile planner for rideshare drivers. Static site. No server.
 
 ## Monetization
 
-Free + ads. Stripe checkout is paused; `STRIPE_LINK` is empty in `app.js`.
+Free + ads (AdSense placeholders). No subscription. `STRIPE_LINK` / `STRIPE_PORTAL` stay empty in `app.js`.
 
-Former Payment Link (deactivate in Stripe if still live):
+Former Payment Link (ops only — do not reactivate for this product):
 
 `https://buy.stripe.com/28E14g5K7asc5Ax4jz4AU00`
 
-## Go live (GitHub Pages)
+## Live
 
-1. Repo is public.
-2. GitHub → Settings → Pages → Deploy from branch `main` / root.
-3. Site URL will be `https://ashleyfarms.github.io/rideshare-cpm/`
+Custom domain: `https://faremax.help-pal-apps.com` (Netlify site `faremax`).
 
 ## Privacy
 

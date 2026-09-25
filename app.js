@@ -1,4 +1,4 @@
-const STRIPE_LINK = '';
+const STRIPE_LINK = ''; /* retired — do not reactivate */
 const STRIPE_PORTAL = '';
 const LICENSE_KEY = '';
 const SUB_LABEL = 'Free · supported by sponsors';
@@ -58,14 +58,13 @@ function flash(msg, warn) {
 }
 function applyGates() {
   const pill = document.getElementById('proPill');
-  pill.textContent = 'FREE';
-  pill.classList.remove('pro');
-  document.getElementById('offerLock').classList.add('hidden');
-  document.getElementById('addTripBtn').disabled = false;
-  document.getElementById('logLock').classList.add('hidden');
-  document.getElementById('logForm').classList.remove('hidden');
-  document.getElementById('histLock').classList.add('hidden');
-  document.getElementById('histWrap').classList.remove('hidden');
+  if (pill) { pill.textContent = 'FREE'; pill.classList.remove('pro'); }
+  const addTrip = document.getElementById('addTripBtn');
+  if (addTrip) addTrip.disabled = false;
+  const logForm = document.getElementById('logForm');
+  if (logForm) logForm.classList.remove('hidden');
+  const histWrap = document.getElementById('histWrap');
+  if (histWrap) histWrap.classList.remove('hidden');
 }
 function fillSetup() {
   ['mpg','fuelPrice','ins','pay','phone','moMiles','maint','dep','thinFloor'].forEach(k => setVal(k, S[k]));
@@ -120,12 +119,11 @@ function checkOffer() {
   document.getElementById('verdictBox').innerHTML = `<div class="verdict"><span class="badge ${s.tag}">${s.tag}</span><p class="muted">${s.why}</p></div><div class="metrics">${metric('Loaded car $', money(s.carCost))}${metric('Net after car', money(s.net))}${metric('Pay / mi', money(s.ppm))}${metric('Net / mi', money(s.npm))}${metric('Net / hr', s.nph === null ? '—' : money(s.nph))}${metric('Fuel guess', money(s.fuelGuess))}</div>`;
 }
 function acceptTrip() {
-  if (!isPro()) { showTab('setup'); flash('Add to shift is Pro. Subscribe or enter your license key.', true); return; }
   if (!lastScore) checkOffer();
   if (!lastScore || lastScore.miles <= 0) return alert('Enter miles and an offer first.');
   S.live.trips.push({ ...lastScore, at: Date.now() }); persist(); renderShift();
 }
-function undoTrip() { if (!isPro()) return; S.live.trips.pop(); persist(); renderShift(); }
+function undoTrip() { S.live.trips.pop(); persist(); renderShift(); }
 function shiftTotals() {
   const t = S.live.trips;
   const miles = t.reduce((a,x)=>a+x.miles,0);
@@ -146,7 +144,6 @@ function renderShift() {
   document.getElementById('shiftTrips').innerHTML = S.live.trips.map((x,i)=>`<div class="trip">#${i+1} ${x.miles.toFixed(1)} mi · ${money(x.offer)} · <b class="${x.tag}">${x.tag}</b> · net ${money(x.net)}</div>`).join('') || '<p class="muted">No trips yet.</p>';
 }
 function endShift() {
-  if (!isPro()) { showTab('setup'); flash('Logging a shift is Pro.', true); return; }
   persist();
   const st = shiftTotals();
   if (st.trips === 0 && st.miles === 0) return alert('Nothing to log.');
@@ -156,7 +153,6 @@ function endShift() {
   persist(); renderShift(); showTab('dash'); fillDash();
 }
 function logShift() {
-  if (!isPro()) return;
   persist();
   const miles = num('logMi'), pay = num('logPay'), hours = num('logHrs');
   const fuel = num('logFuel'), extras = num('logX');
@@ -168,13 +164,13 @@ function logShift() {
 }
 function fillDash() {
   persist();
-  const sh = isPro() ? S.shifts : [];
+  const sh = S.shifts || [];
   const miles = sh.reduce((a,x)=>a+x.miles,0);
   const pay = sh.reduce((a,x)=>a+x.pay,0);
   const net = sh.reduce((a,x)=>a+x.net,0);
   const hrs = sh.reduce((a,x)=>a+(x.hours||0),0);
   const c = costs(); const irs = irsRate();
-  document.getElementById('dashMetrics').innerHTML = metric('Loaded $/mi', money(c.loaded)) + metric('Pay / mi', miles ? money(pay/miles) : '—') + metric('Net / mi', miles ? money(net/miles) : '—') + metric('IRS $/mi', money(irs)) + metric('Logged miles', isPro() ? miles.toFixed(0) : 'Pro') + metric('Logged net', isPro() ? money(net) : 'Pro') + metric('Net / hr', hrs ? money(net/hrs) : '—') + metric('Shifts', isPro() ? sh.length : 'Pro');
+  document.getElementById('dashMetrics').innerHTML = metric('Loaded $/mi', money(c.loaded)) + metric('Pay / mi', miles ? money(pay/miles) : '—') + metric('Net / mi', miles ? money(net/miles) : '—') + metric('IRS $/mi', money(irs)) + metric('Logged miles', miles.toFixed(0)) + metric('Logged net', money(net)) + metric('Net / hr', hrs ? money(net/hrs) : '—') + metric('Shifts', sh.length);
   document.getElementById('irsNote').textContent = `2026 IRS business mileage: $0.725 (Jan–Jun) and $0.76 (Jul–Dec). Deadhead to a pickup counts as business miles. Planning only — not tax advice. Current rate used here: ${money(irs)}.`;
   const tb = document.querySelector('#histTable tbody');
   if (tb) tb.innerHTML = sh.map(x => `<tr><td>${x.date}</td><td>${(+x.miles).toFixed(1)}</td><td>${money(x.pay)}</td><td class="${x.net>=0?'ok':'bad'}">${money(x.net)}</td><td>${x.miles?money(x.net/x.miles):'—'}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">No shifts yet.</td></tr>';
@@ -183,107 +179,41 @@ function fillDash() {
 function saveSetup() { persist(); fillSetup(); flash('Setup saved on this device.'); }
 function resetSetup() {
   const keep = S.shifts;
-  const paid = { paid: S.paid, subStatus: S.subStatus, subSince: S.subSince };
-  S = { ...defaults, shifts: keep, live: S.live, ...paid }; persist(); fillSetup();
+  S = { ...defaults, shifts: keep, live: S.live }; persist(); fillSetup();
 }
 function clearHistory() {
-  if (!isPro()) return;
   if (!confirm('Clear all saved shifts on this device?')) return;
   S.shifts = []; persist(); fillDash();
 }
 function exportJson() {
-  if (!isPro()) { flash('Export is Pro.', true); return; }
   const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'rideshare-cpm-data.json'; a.click();
 }
 function importJson(ev) {
-  if (!isPro()) return;
   const file = ev.target.files && ev.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
       if (!data || typeof data !== 'object') throw new Error('bad');
-      const paid = { paid: S.paid, subStatus: S.subStatus, subSince: S.subSince };
-      S = { ...defaults, ...data, ...paid, live: { ...defaults.live, ...(data.live || {}) } };
+      S = { ...defaults, ...data, live: { ...defaults.live, ...(data.live || {}) } };
       persist(); fillSetup(); fillOffer(); fillDash();
-      flash('Import complete. Subscription status on this device was kept.');
+      flash('Import complete. Data loaded on this device.');
     } catch { alert('Could not read that JSON file.'); }
   };
   reader.readAsText(file); ev.target.value = '';
 }
-function stripeConfigured() { return STRIPE_LINK && !STRIPE_LINK.includes('REPLACE_ME'); }
-function portalConfigured() { return !!(STRIPE_PORTAL && STRIPE_PORTAL.indexOf('http') === 0); }
-
-/** GA4 purchase+subscribe once per successful checkout (no price constant in this app — value omitted). */
-function trackSubscriptionPurchase(transactionId) {
-  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
-  var tid = String(transactionId || '').trim() || ('local-rideshare-cpm-' + Date.now());
-  var key = 'ga-sub-rideshare-cpm-' + tid;
-  try {
-    if (localStorage.getItem(key)) return;
-    localStorage.setItem(key, '1');
-  } catch (e) {}
-  var payload = {
-    transaction_id: tid,
-    currency: 'USD',
-    items: [{ item_name: 'RideShare CPM subscription', item_category: 'subscription' }]
-  };
-  window.gtag('event', 'purchase', payload);
-  window.gtag('event', 'subscribe', { app: 'rideshare-cpm', currency: 'USD' });
-}
-
 function markPaidFromUrl() {
+  /* Stripe checkout retired — strip legacy query params quietly */
   try {
     const q = new URLSearchParams(location.search);
-    if (q.get('paid') === '1' || q.get('sub') === 'active') {
-      S.paid = true; S.subStatus = 'active'; S.subSince = S.subSince || new Date().toISOString();
-      localStorage.setItem(KEY, JSON.stringify(S));
+    if (q.get('paid') || q.get('sub') || q.get('session_id')) {
       history.replaceState({}, '', location.pathname);
-      trackSubscriptionPurchase(q.get('session_id') || 'paid-1');
-      flash('Pro unlocked on this device. Manage billing in Stripe to cancel.');
-    }
-    if (q.get('sub') === 'canceled') {
-      S.paid = false; S.subStatus = 'canceled';
-      localStorage.setItem(KEY, JSON.stringify(S));
-      history.replaceState({}, '', location.pathname);
-      flash('This device is marked unpaid.', true);
     }
   } catch {}
 }
-function unlockWithKey() {
-  const raw = (document.getElementById('unlockKey').value || '').trim().toUpperCase();
-  if (!LICENSE_KEY) { alert('Set LICENSE_KEY first.'); return; }
-  if (raw === LICENSE_KEY.toUpperCase()) {
-    S.paid = true; S.subStatus = 'active'; S.subSince = S.subSince || new Date().toISOString();
-    persist(); applyGates(); renderPay(); fillDash(); flash('Pro restored on this device.');
-  } else flash('That key does not match.', true);
-}
-function lockDevice() {
-  if (!confirm('Mark this device as unpaid? Use this after you cancel in Stripe.')) return;
-  S.paid = false; S.subStatus = 'canceled'; persist(); applyGates(); renderPay(); fillDash();
-}
-function renderPay() {
-  const a = document.getElementById('payNow');
-  const m = document.getElementById('manageSub');
-  const status = document.getElementById('payStatus');
-  const box = document.getElementById('stripeBox');
-  if (a) { a.href = '#'; a.classList.add('off'); a.textContent = 'Free · supported by sponsors'; }
-  if (m) { m.style.display = 'none'; }
-  if (status) status.textContent = 'Free on this device. Quiet ads keep RideShare CPM free — no subscription.';
-  if (box) box.textContent = 'Free with ads. Stripe checkout is paused.';
-}
+function renderPay() { /* paywall UI removed — free with ads */ }
 
-function goPay(ev) {
-  if (ev) ev.preventDefault();
-  flash('RideShare CPM is free with ads — no checkout needed.');
-  return false;
-}
-function goPortal(ev) {
-  if (ev) ev.preventDefault();
-  flash('No billing portal — app is free with ads.');
-  return false;
-}
 function showTab(name) {
   ['setup','offer','log','dash'].forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('hidden', t !== name);

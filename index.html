@@ -4,17 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0b1220" />
-<meta name="description" content="RideShare CPM planner for drivers" />
+<meta name="description" content="FareMax — rideshare cost-per-mile planner for drivers. Free with ads." />
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" />
-<title>RideShare CPM</title>
+<title>FareMax — RideShare CPM</title>
+  <meta name="google-adsense-account" content="ca-pub-9747855263717273">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9747855263717273" crossorigin="anonymous"></script>
+
 <style>
 :root{--bg:#0b1220;--card:#121b2e;--card2:#182338;--line:#243049;--text:#e8eef8;--muted:#93a0b8;--accent:#3d8bfd;--good:#22c55e;--thin:#eab308;--skip:#ef4444;--radius:16px}
 *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}body{padding-bottom:88px}
 header.app{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#0b1220 70%,rgba(11,18,32,.85));padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
 h1{margin:0;font-size:18px}header.app p{margin:4px 0 0;color:var(--muted);font-size:12px}
 .pill{flex-shrink:0;margin-top:2px;font-size:11px;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--muted);cursor:pointer}
-.pill.pro{background:rgba(34,197,94,.16);color:var(--good);border-color:transparent}
 .wrap{max-width:720px;margin:0 auto;padding:12px 14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
 .card h2{margin:0 0 10px;font-size:15px}
@@ -24,9 +26,7 @@ input{width:100%;background:var(--card2);color:var(--text);border:1px solid var(
 .full{grid-column:1/-1}
 button{border:0;border-radius:12px;padding:12px 14px;font-weight:700;font-size:15px;background:var(--accent);color:#fff;width:100%;cursor:pointer}
 button.secondary{background:#243049;color:var(--text)}button.good{background:#15803d}button.danger{background:#991b1b}button.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
-button:disabled,a.pay.off{opacity:.45;pointer-events:none}
-a.pay{display:block;text-align:center;text-decoration:none;border-radius:12px;padding:12px 14px;font-weight:700;font-size:15px;background:var(--good);color:#052e16;width:100%}
-a.pay.manage{background:#243049;color:var(--text);margin-top:8px}
+button:disabled{opacity:.45;pointer-events:none}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .metric{background:var(--card2);border-radius:12px;padding:10px}.metric b{display:block;font-size:18px}.metric span{color:var(--muted);font-size:11px}
@@ -39,7 +39,6 @@ a.pay.manage{background:#243049;color:var(--text);margin-top:8px}
 .muted{color:var(--muted);font-size:12px;line-height:1.45}.tiny{font-size:11px;color:var(--muted)}
 table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}th{color:var(--muted)}
 .ok{color:var(--good)}.bad{color:var(--skip)}
-.lock{margin-top:10px;padding:12px;border-radius:12px;background:rgba(61,139,253,.08);border:1px dashed var(--line)}
 .banner{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);padding:10px 12px;border-radius:12px;margin-bottom:12px;font-size:13px}
 .banner.warn{background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.35)}
 </style><!-- Google Analytics 4 -->
@@ -51,8 +50,8 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;p
   gtag('config', 'G-E7PX36SGJE');
 </script>
 </head><body>
-<header class="app"><div><h1>RideShare Cost Per Mile</h1><p>Planning tool — not tax advice. Data stays on this device unless you export.</p></div>
-<button type="button" class="pill" id="proPill" onclick="showTab('setup');document.getElementById('payCard').scrollIntoView({behavior:'smooth'})">FREE</button></header>
+<header class="app"><div><h1>FareMax</h1><p class="muted" style="margin:.2rem 0 0">RideShare cost per mile</p><p>Planning tool — not tax advice. Data stays on this device unless you export.</p></div>
+<button type="button" class="pill" id="proPill" title="Free with ads">FREE</button></header>
 <div class="wrap"><div id="flash" class="hidden"></div>
 <section id="tab-setup">
 <div class="card"><h2>Vehicle &amp; costs</h2>
@@ -69,13 +68,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;p
 </div>
 <div class="btns"><button type="button" onclick="saveSetup()">Save setup</button><button type="button" class="secondary" onclick="resetSetup()">Reset defaults</button></div></div>
 <aside class="ad-slot ad-slot--header" aria-label="Advertisement — header" data-ad-slot="header" data-ad-ready="placeholder" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;margin:.75rem 0;border:1px dashed rgba(0,0,0,.25);border-radius:10px;font-size:.8rem;opacity:.85"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;border:1px solid rgba(0,0,0,.2);border-radius:5px;padding:.1rem .35rem">Ad</span><span>Free · supported by sponsors</span></aside>
-<div class="card" id="payCard"><h2>Free with ads</h2>
-<p class="muted">All features unlocked: loaded $/mi, offer checks, live shift, shift log, dashboard history, export/import.</p>
-<p class="muted">Quiet sponsor spots keep RideShare CPM free. Stripe checkout is paused.</p>
-<a class="pay off" id="payNow" href="#" onclick="return false">Free · supported by sponsors</a>
-<a class="pay manage" id="manageSub" href="#" style="display:none" onclick="return false">Manage / cancel</a>
-<input id="unlockKey" type="hidden" value="">
-<p class="tiny" id="payStatus" style="margin-top:10px">Free on this device. No subscription.</p></div>
+<p class="muted" id="freeNote" style="margin:0 0 12px">Free with ads. No paid plans. All features unlocked.</p>
 <div class="card"><h2>Loaded cost per mile</h2><div class="metrics" id="setupMetrics"></div>
 <p class="muted" style="margin-top:10px">Fuel = price ÷ MPG. Fixed costs spread across expected monthly miles. IRS rate is a planning benchmark only — pick standard OR actual expenses per car per year, not both.</p></div>
 </section>
@@ -93,14 +86,13 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;p
 <div class="full"><label>Tolls / extras $</label><input id="tolls" type="number" inputmode="decimal" step="0.01"></div></div>
 <div class="btns"><button type="button" onclick="checkOffer()">Check offer</button><button type="button" class="good" id="addTripBtn" onclick="acceptTrip()">Add to shift</button></div>
 <div id="verdictBox"></div>
-<div id="offerLock" class="lock hidden"></div></div>
+</div>
 <div class="card"><h2>Live shift</h2><div class="metrics" id="shiftMetrics"></div><div id="shiftTrips"></div>
 <div class="row" style="margin-top:10px"><div><label>Gas purchased $</label><input id="gasDollars" type="number" inputmode="decimal" step="0.01"></div><div><label>Gallons (optional)</label><input id="gasGal" type="number" inputmode="decimal" step="0.01"></div></div>
 <p class="tiny">Pump total replaces the MPG fuel guess for this shift net.</p>
 <div class="btns"><button type="button" class="secondary" onclick="undoTrip()">Undo last trip</button><button type="button" class="danger" onclick="endShift()">End shift → Dashboard</button></div></div>
 </section>
 <section id="tab-log" class="hidden"><div class="card"><h2>Log a whole shift</h2>
-<div id="logLock" class="lock hidden"></div>
 <div id="logForm"><div class="row">
 <div><label>Date</label><input id="logDate" type="date"></div>
 <div><label>Hours</label><input id="logHrs" type="number" inputmode="decimal" step="0.1"></div>
@@ -114,19 +106,21 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;p
 <input id="importFile" type="file" accept="application/json,.json" class="hidden" onchange="importJson(event)"></div></div></div></section>
 <section id="tab-dash" class="hidden"><div class="card"><h2>Dashboard</h2><div class="metrics" id="dashMetrics"></div><p class="muted" id="irsNote"></p></div>
 <div class="card"><h2>Shift history</h2>
-<div id="histLock" class="lock hidden"></div>
 <aside class="ad-slot ad-slot--in-feed" aria-label="Advertisement — in feed" data-ad-slot="in-feed" data-ad-ready="placeholder" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;margin:.75rem 0;border:1px dashed rgba(0,0,0,.25);border-radius:10px;font-size:.8rem;opacity:.85"><span style="font-size:.65rem;font-weight:700;text-transform:uppercase;border:1px solid rgba(0,0,0,.2);border-radius:5px;padding:.1rem .35rem">Ad</span><span>Free · supported by sponsors</span></aside>
 <div id="histWrap"><div style="overflow-x:auto"><table id="histTable"><thead><tr><th>Date</th><th>Mi</th><th>Pay</th><th>Net</th><th>$/mi</th></tr></thead><tbody></tbody></table></div>
 <div class="btns" style="margin-top:10px"><button type="button" class="secondary" onclick="clearHistory()">Clear history</button></div></div>
-<p class="tiny" id="stripeBox"></p></div></section></div>
+</div></section></div>
 <nav class="nav">
 <button type="button" id="n-setup" class="on" onclick="showTab('setup')">Setup</button>
 <button type="button" id="n-offer" onclick="showTab('offer')">Offer</button>
 <button type="button" id="n-log" onclick="showTab('log')">Log</button>
 <button type="button" id="n-dash" onclick="showTab('dash')">Dash</button>
 </nav>
+<p style="text-align:center;font-size:12px;opacity:.75;margin:10px 12px 8px">
+  Free with ads. We don't sell your personal info — usage stats and ads keep FareMax free. Analytics: G-E7PX36SGJE. Numbers stay on this device.
+</p>
 <p style="text-align:center;font-size:12px;opacity:.75;margin:10px 12px 18px">
-  <a href="https://help-pal-apps.com/our-app-collection" target="_blank" rel="noopener noreferrer" style="color:inherit">More apps from Help-Pal</a>
+  <a href="https://help-pal-apps.com/our-app-collection" target="_blank" rel="noopener noreferrer" style="color:inherit">More apps from Help-Pal</a> · <a href="/privacy.html" style="color:inherit">Privacy</a>
 </p>
 
 <script src="app.js"></script>
