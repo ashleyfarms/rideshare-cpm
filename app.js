@@ -1,13 +1,8 @@
-const STRIPE_LINK = ''; /* retired — do not reactivate */
-const STRIPE_PORTAL = '';
-const LICENSE_KEY = '';
-const SUB_LABEL = 'Free · supported by sponsors';
 const KEY = 'rscpm_v1';
 const defaults = {
   mpg: 28, fuelPrice: 3.29, ins: 160, pay: 380, phone: 40, moMiles: 2500,
   maint: 0.08, dep: 0.12, thinFloor: 18,
   needNet: 200, needHrs: 8,
-  paid: false, subStatus: '', subSince: '',
   shifts: [], live: { trips: [], gasDollars: 0, gasGal: 0 }
 };
 function load() {
@@ -19,7 +14,6 @@ function load() {
   } catch { return { ...defaults, live: { trips: [], gasDollars: 0, gasGal: 0 } }; }
 }
 let S = load();
-function isPro() { return true; /* free + ads — all features unlocked */ }
 function persist() {
   S.mpg = num('mpg', S.mpg); S.fuelPrice = num('fuelPrice', S.fuelPrice);
   S.ins = num('ins', S.ins); S.pay = num('pay', S.pay); S.phone = num('phone', S.phone);
@@ -58,7 +52,7 @@ function flash(msg, warn) {
 }
 function applyGates() {
   const pill = document.getElementById('proPill');
-  if (pill) { pill.textContent = 'FREE'; pill.classList.remove('pro'); }
+  if (pill) pill.textContent = 'FREE';
   const addTrip = document.getElementById('addTripBtn');
   if (addTrip) addTrip.disabled = false;
   const logForm = document.getElementById('logForm');
@@ -75,7 +69,7 @@ function fillSetup() {
     + metric('Maint+dep $/mi', money(c.maint + c.dep))
     + metric('IRS 2026 now', money(irsRate()))
     + metric('vs IRS', (c.loaded - irsRate()) >= 0 ? ('+' + money(c.loaded - irsRate())) : money(c.loaded - irsRate()));
-  renderPay(); applyGates();
+  applyGates();
 }
 function fillOffer() {
   setVal('needNet', S.needNet); setVal('needHrs', S.needHrs);
@@ -174,7 +168,7 @@ function fillDash() {
   document.getElementById('irsNote').textContent = `2026 IRS business mileage: $0.725 (Jan–Jun) and $0.76 (Jul–Dec). Deadhead to a pickup counts as business miles. Planning only — not tax advice. Current rate used here: ${money(irs)}.`;
   const tb = document.querySelector('#histTable tbody');
   if (tb) tb.innerHTML = sh.map(x => `<tr><td>${x.date}</td><td>${(+x.miles).toFixed(1)}</td><td>${money(x.pay)}</td><td class="${x.net>=0?'ok':'bad'}">${money(x.net)}</td><td>${x.miles?money(x.net/x.miles):'—'}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">No shifts yet.</td></tr>';
-  renderPay(); applyGates();
+  applyGates();
 }
 function saveSetup() { persist(); fillSetup(); flash('Setup saved on this device.'); }
 function resetSetup() {
@@ -203,16 +197,6 @@ function importJson(ev) {
   };
   reader.readAsText(file); ev.target.value = '';
 }
-function markPaidFromUrl() {
-  /* Stripe checkout retired — strip legacy query params quietly */
-  try {
-    const q = new URLSearchParams(location.search);
-    if (q.get('paid') || q.get('sub') || q.get('session_id')) {
-      history.replaceState({}, '', location.pathname);
-    }
-  } catch {}
-}
-function renderPay() { /* paywall UI removed — free with ads */ }
 
 function showTab(name) {
   ['setup','offer','log','dash'].forEach(t => {
@@ -229,5 +213,5 @@ document.getElementById('logDate').value = new Date().toISOString().slice(0,10);
 ['needNet','needHrs','gasDollars','gasGal'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => { persist(); fillOffer(); });
 });
-markPaidFromUrl(); fillSetup(); fillOffer(); fillDash(); renderPay(); applyGates();
+fillSetup(); fillOffer(); fillDash(); applyGates();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

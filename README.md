@@ -6,15 +6,11 @@ Loaded cost-per-mile planner for rideshare drivers. Static site. No server.
 
 ## Monetization
 
-Free + ads (AdSense placeholders). No subscription. `STRIPE_LINK` / `STRIPE_PORTAL` stay empty in `app.js`.
-
-Former Payment Link (ops only — do not reactivate for this product):
-
-`https://buy.stripe.com/28E14g5K7asc5Ax4jz4AU00`
+Free + ads (AdSense). No subscription, no paid features.
 
 ## Live
 
-Custom domain: `https://faremax.help-pal-apps.com` (Netlify site `faremax`).
+Custom domain: `https://faremax.help-pal-apps.com`.
 
 ## Privacy
 
