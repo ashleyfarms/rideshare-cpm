@@ -16,7 +16,7 @@
 *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}body{padding-bottom:88px}
 header.app{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#0b1220 70%,rgba(11,18,32,.85));padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
 h1{margin:0;font-size:18px}header.app p{margin:4px 0 0;color:var(--muted);font-size:12px}
-.pill{flex-shrink:0;margin-top:2px;font-size:11px;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--muted);cursor:pointer}
+.pill{flex-shrink:0;align-self:flex-start;margin-top:2px;font-size:11px;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--muted);cursor:pointer}
 .wrap{max-width:720px;margin:0 auto;padding:12px 14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
 .card h2{margin:0 0 10px;font-size:15px}
@@ -25,6 +25,7 @@ label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
 input{width:100%;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font-size:16px}
 .full{grid-column:1/-1}
 button{border:0;border-radius:12px;padding:12px 14px;font-weight:700;font-size:15px;background:var(--accent);color:#fff;width:100%;cursor:pointer}
+header.app .pill{width:auto;padding:6px 10px;font-size:11px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--muted)}
 button.secondary{background:#243049;color:var(--text)}button.good{background:#15803d}button.danger{background:#991b1b}button.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
 button:disabled{opacity:.45;pointer-events:none}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
@@ -48,6 +49,34 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;p
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-E7PX36SGJE');
+</script>
+<script>
+/* Help-Pal usage events v1: app_used, return_visit, repeat_user (see /workspace/analytics/USAGE-TRACKING.md) */
+(function (A) { try {
+  var K = 'hp_seen_' + A, s = {}, done = false, d = new Date();
+  var T = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  function ev(n, p) { try { if (typeof window.gtag === 'function') { p = p || {}; p.app = A; window.gtag('event', n, p); } } catch (e) {} }
+  function save() { try { localStorage.setItem(K, JSON.stringify(s)); } catch (e) {} }
+  try { s = JSON.parse(localStorage.getItem(K) || '{}') || {}; } catch (e) { s = {}; }
+  if (s.last && s.last !== T) ev('return_visit', { days_since_last: Math.max(1, Math.round((Date.parse(T) - Date.parse(s.last)) / 864e5)) || 1 });
+  if (!s.first) s.first = T;
+  s.last = T; save();
+  function hit(e) { try {
+    if (done) return;
+    var t = e.target; if (!t || !t.closest) return;
+    if (e.type === 'click') {
+      var c = t.closest('button,[role=button],input[type=submit],input[type=button],a.btn,a[class*="btn"],a[class*="button"]');
+      if (!c || c.closest('nav,footer,ins,.adsbygoogle')) return;
+      if (c.tagName === 'A' && c.hostname && c.hostname !== location.hostname) return;
+    } else if (!t.closest('input,select,textarea,[contenteditable]')) return;
+    done = true;
+    var again = s.used && s.used !== T;
+    ev('app_used'); if (again) ev('repeat_user');
+    s.used = T; save();
+    ['click', 'input', 'change'].forEach(function (n) { document.removeEventListener(n, hit, true); });
+  } catch (x) {} }
+  ['click', 'input', 'change'].forEach(function (n) { document.addEventListener(n, hit, true); });
+} catch (e) {} })('faremax');
 </script>
 </head><body>
 <header class="app"><div><h1>FareMax</h1><p class="muted" style="margin:.2rem 0 0">RideShare cost per mile</p><p>Planning tool — not tax advice. Data stays on this device unless you export.</p></div>
